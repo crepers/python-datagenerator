@@ -19,6 +19,8 @@ SCHEMA_CONV_TOOL = {
   "IP_address": str,
   "url": str,
   "is_purchased": str,
+  "is_purchased_num": int,
+  "is_page_errored_num": float,
   "is_page_errored": str,
   "user_session_id": str,
   "city": str,
@@ -28,8 +30,7 @@ SCHEMA_CONV_TOOL = {
 
 DELIMETER_BY_FORMAT = {
   'csv': ',',
-  'tsv': '|'
-#   'tsv': '\t'
+  'tsv': '\t'
 }
 
 def gen_records(options, reader):
@@ -54,12 +55,17 @@ def gen_records(options, reader):
     else:
       try:
         data = json.dumps(OrderedDict([(k, SCHEMA_CONV_TOOL[k](v)) for k, v in row.items()]), ensure_ascii=False)
+        data = json.loads(data)
+        data['is_purchased_num'] = int(data['is_purchased'])
+        data['is_page_errored_num'] = float(data['is_page_errored'])
+        data = json.dumps(data)
       except Exception as ex:
         traceback.print_exc()
         continue
     if options.max_count == len(record_list):
       yield record_list
       record_list = []
+
     record_list.append(data)
 
   if record_list:
